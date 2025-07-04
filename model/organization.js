@@ -17,6 +17,10 @@ const organizationSchema = new Schema({
     ref: "User",  
     required: true,
   },
+   product: {
+    type: String,  // <-- Will store extracted text from PDF/Doc
+    default: "",   // optional
+  },
   isDeleted: {
     type: Boolean,
     default: false,  // <-- ✅ This is for soft delete

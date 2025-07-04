@@ -18,6 +18,7 @@ const createOrganization = async (req, res) => {
       size: data.size,
       sector: data.sector,
       owner: user._id,
+      product: data.product
     });
 
     const savedOrg = await newOrg.save();
