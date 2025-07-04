@@ -10,6 +10,10 @@ const userSchema = new Schema({
     required: true,
     unique: true,  // usually emails are unique
   },
+  isValidated: {
+    type: Boolean,
+    default: false
+  },
   password: {
     type: String,
     default: null,
