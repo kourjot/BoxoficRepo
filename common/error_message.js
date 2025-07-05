@@ -4,6 +4,8 @@ export const DOB = "200::422::Date of Birth is require.";
 
 export const NEW_PASSWORD = "200::422::New Password is require.";
 
+export const GOOGLE_AUTH_MISSING="200::422::Missing required Google credentials.";
+
 export const CONFIRM_PASSWORD = "200::422:: Confirm Password is require.";
 
 export const REFERRAL_CODE = "200::422:: Referral Code is require.";

@@ -29,11 +29,30 @@ const signIn = async (req, res, next) => {
       phoneNumber,
       role: role 
     });
+    const token = jwt.sign(
+      {
+        username: userExists.name,
+        email: userExists.email,
+        userId: userExists._id,
+        role: userExists.role,
+      },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "7d" }
+    );
 
     await newUser.save();
 
-    return res.status(201).json({ massage: "User registered successfully" });
-
+    return res.status(201).json({
+      message: "User registered  successfully",
+      token,
+      user: {
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        isOrganization: newUser.isOrganization,
+        _id: newUser._id,
+      },
+    });
   } catch (err) {
     next(err); // ✅ Send to global error handler
   }
@@ -64,7 +83,18 @@ const login = async (req, res, next) => {
       { expiresIn: "7d" }
     );
 
-    res.status(200).json({ massage: "Logged in successfully", token });
+    
+    return res.status(201).json({
+      message:  "Logged in successfully",
+      token,
+      user: {
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        isOrganization: newUser.isOrganization,
+        _id: newUser._id,
+      },
+    });
   } catch (err) {
     next(err); // Let the global error handler catch it
   }

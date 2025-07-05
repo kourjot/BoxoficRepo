@@ -31,19 +31,27 @@ const googleLogin = async (req, res, next) => {
 
     // Generate JWT Token
     const token = jwt.sign(
-      {
-        userId: user._id,
-        email: user.email,
-        role: user.role,
-      },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: "7d" }
-    );
+          {
+            username: user.name,
+            email: user.email,
+            userId: user._id,
+            role: user.role,
+          },
+          process.env.JWT_SECRET_KEY,
+          { expiresIn: "7d" }
+        );
 
     return res.status(200).json({
       massage: "Google login successful",
       token,
-      user,
+      user: {
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+        organization: user.isOrganization,
+        role: user.role,
+        _id: user._id,
+     },
     });
   } catch (error) {
     next(error); // pass error to global error handler
