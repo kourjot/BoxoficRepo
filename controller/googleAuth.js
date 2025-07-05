@@ -42,7 +42,7 @@ const googleLogin = async (req, res, next) => {
         );
 
     return res.status(200).json({
-      massage: "Google login successful",
+      message: "Google login successful",
       token,
       user: {
         name: user.name,
