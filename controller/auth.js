@@ -1,73 +1,72 @@
 import {User} from "../model/user.js";
 import jwt from "jsonwebtoken";
+import * as ERROR from "../common/error_message.js";
+
 import argon2  from "argon2"
 import "dotenv/config";
-const signIn = async (req, res) => {
-    const { name, email, password ,phoneNumber, role} = req.body;
 
-    try {
-        // Check if user already exists
-        const userExists = await User.findOne({ email });
-        if (userExists) {
-            return res.status(400).json({ msg: "User already exists" });
-        }
+const signIn = async (req, res, next) => {
+  const { name, email, password, phoneNumber, role } = req.body;
 
-        // Hash the password
-        const hash = await argon2.hash(password);
+  try {
+    // 🔍 Basic validation
+    if (!name) throw new Error(ERROR.NAME);
+    if (!email) throw new Error(ERROR.EMAIL);
+    if (!password) throw new Error(ERROR.PASSWORD);
+    
+    // ❗ Check if user already exists
+    const userExists = await User.findOne({ email });
+    if (userExists) throw new Error(ERROR.ACCOUNT_ALREADY_EXISTS);
 
-        // Create a new user
-        const newUser = new User({
-            name,
-            email,
-            password: hash,
-            phoneNumber,
-            role: role || "user", 
-        });
+    // 🔐 Hash the password
+    const hash = await argon2.hash(password);
 
-        // Save the user to the database
-        await newUser.save();
+    // 👤 Create user
+    const newUser = new User({
+      name,
+      email,
+      password: hash,
+      phoneNumber,
+      role: role 
+    });
 
-        // Respond with success message
-        res.status(201).json({ msg: "User registered successfully" });
-    } catch (err) {
-        // Handle errors
-        res.status(500).json({ msg: "Error in registration", error: err.message });
-    }
+    await newUser.save();
+
+    return res.status(201).json({ massage: "User registered successfully" });
+
+  } catch (err) {
+    next(err); // ✅ Send to global error handler
+  }
 };
 
 
-const login = async (req, res) => {
-    const { email, password } = req.body;
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
 
-    try {
-        // Check if user exists
-        const userExists = await User.findOne({ email });
-        if (!userExists) {
-            return res.status(404).json({ msg: "User not found" });
-        }
+  try {
+    if (!email) throw new Error(ERROR.EMAIL);
+    if (!password) throw new Error(ERROR.PASSWORD);
 
-        // Verify the password
-        const valid = await argon2.verify(userExists.password, password);
-        if (!valid) {
-            return res.status(401).json({ msg: "Invalid credentials" });
-        }
+    const userExists = await User.findOne({ email });
+    if (!userExists) throw new Error(ERROR.USER_NOT_FOUND);
 
-        // Generate a JWT token
-        const token = jwt.sign(
-            {
-                username: userExists.username,
-                email: userExists.email,
-                userId: userExists._id
-            },
-            process.env.JWT_SECRET_KEY,
-            { expiresIn: "7d" }
-        );
+    const valid = await argon2.verify(userExists.password, password);
+    if (!valid) throw new Error(ERROR.INVALID_CREDENTIALS);
 
-        // Respond with success message and token
-        res.status(200).json({ msg: "Logged in successfully", token });
-    } catch (err) {
-        // Handle errors
-        res.status(500).json({ msg: "Error in login", error: err.message });
-    }
+    const token = jwt.sign(
+      {
+        username: userExists.name,
+        email: userExists.email,
+        userId: userExists._id,
+        role: userExists.role,
+      },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "7d" }
+    );
+
+    res.status(200).json({ massage: "Logged in successfully", token });
+  } catch (err) {
+    next(err); // Let the global error handler catch it
+  }
 };
 export { signIn, login };

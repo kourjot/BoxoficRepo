@@ -1,77 +1,53 @@
 
-import {OAuth2Client} from "google-auth-library";
+
 import "dotenv/config";
 import {User} from "../model/user.js";
 import jwt from "jsonwebtoken";
-// Load the client ID from environment variables
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const client = new OAuth2Client(CLIENT_ID);
- 
-const healthCheck = (req, res) => {
-  return res.status(200).json({
-    status: "success",
-    message: "Server is running",
-  });
-};
 
-const googleAuth = async (req, res) => {
+import * as  ERROR  from "../common/error_message.js";
 
-  const { token } = req.body;
-//   console.log("Received token:", token);
+const googleLogin = async (req, res, next) => {
   try {
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: CLIENT_ID,
-    });
-    console.log(ticket);
+    const { name, email, picture, sub: socialId } = req.body;
 
-    const payload = ticket.getPayload();
-    const {email,name}  = payload;
-
-    let user=await User.findOne({email})
-    if(user){
-        console.log("User already exists:", user);
-        return res.status(400).json({
-            status: "error",
-            message: "User already exists, please login",
-        })
+    if (!email || !socialId) {
+      throw new Error(ERROR.GOOGLE_AUTH_MISSING);
     }
 
+    let user = await User.findOne({ email });
 
-    if(!user){
-        user = await User.create({
-            name,
-            email,
-            password: null, // Google auth does not require a password
-            phoneNumber: null, // Assuming phoneNumber is optional
-            role: "user", // Default role for new users
-        });
+    if (!user) {
+      // Create new user if not found
+      user = new User({
+        name,
+        email,
+        picture,
+        socialId,
+        isGoogleUser: true,
+      });
+
+      await user.save();
     }
-    const jwtToken=jwt.sign({
-        userId:user._id,
-        email:user.email,
-        role:user.role
-    },process.env.JWT_SECRET,{
-        expiresIn:"7d" // Token will expire in 7 days
-    })
-    console.log("JWT Token:", jwtToken);    
+
+    // Generate JWT Token
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        role: user.role,
+      },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "7d" }
+    );
+
     return res.status(200).json({
-      status: "success",
-      token: jwtToken,
-      message: "User authenticated successfully",
-      email,
-      name,
+      massage: "Google login successful",
+      token,
+      user,
     });
   } catch (error) {
-
-    return res.status(400).json({
-      status: "error",
-      message: error.message,
-    });
+    next(error); // pass error to global error handler
   }
-}
+};
 
-
-
-
-export { googleAuth , healthCheck};
+export { googleLogin };

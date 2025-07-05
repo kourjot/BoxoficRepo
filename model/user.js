@@ -24,12 +24,28 @@ const userSchema = new Schema({
   },
   role: {
     type: String,
-    default: "user",  // default role is user
+    enum: ["admin", "manager", "teamLead"],
+    default: "teamLead",  // default role is teamLead
   },
   isOrganization: {
     type: Number,
     default: 0, // 0 = no organization created, 1 = organization created
   },
+  isDeleted: {
+  type: Boolean,
+  default: false,
+  },
+  socialId: {
+        type: String, // Google `sub` ID
+      },
+   picture: {
+      type: String, // Google profile image URL
+    },
+    isGoogleUser: {
+      type: Boolean,
+      default: false,
+    },
+
 }, { timestamps: true });
 
 // Create the model
