@@ -45,6 +45,11 @@ const userSchema = new Schema({
       type: Boolean,
       default: false,
     },
+    organization: {
+    type: Schema.Types.ObjectId,
+    ref: "Organization",  // This links user to an organization
+    default: null,
+  },
 
 }, { timestamps: true });
 

@@ -2,7 +2,7 @@ import {Router} from "express";
 import { googleLogin} from "../controller/googleAuth.js";
 import { createOrganization ,getOrganizations,getOrganizationById ,updateOrganization,softDeleteOrganization } from "../controller/organization.js";
 import { tokenVerify } from "../middleware/auth.js";
-import {signIn ,login} from "../controller/auth.js";
+import {signIn ,login,getUserById} from "../controller/auth.js";
 const router = Router();
 
 router.post("/auth/google",googleLogin )
@@ -11,6 +11,8 @@ router.post("/auth/google",googleLogin )
 router.post("/signup", signIn);
 
 router.post("/login", login);
+
+router.get("/user/:id", tokenVerify, getUserById);
 
 router.post("/organization/create", tokenVerify, createOrganization);
 

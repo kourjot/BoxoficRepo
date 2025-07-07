@@ -8,11 +8,11 @@ const createOrganization = async (req, res, next) => {
   const data = req.body;
 
   try {
-    // ✅ Get owner from JWT
+    //  Get owner from JWT
     const ownerId = req.user?.userId;
     if (!ownerId) throw new Error(ERROR.USER_NOT_FOUND);
 
-    // ✅ Required field validations
+    //  Required field validations
     if (!data.company_name) throw new Error(ERROR.NAME);
     if (!data.size) throw new Error("200::422::Organization size is required.");
     if (!data.sector) throw new Error("200::422::Organization sector is required.");
@@ -20,13 +20,13 @@ const createOrganization = async (req, res, next) => {
     const user = await User.findById(ownerId);
     if (!user) throw new Error(ERROR.USER_NOT_FOUND);
 
-    // ✅ Create Organization
+    //  Create Organization
     const newOrg = new Organization({
       company_name: data.company_name,
       size: data.size,
       sector: data.sector,
       owner: user._id,
-      product: data.product || "",
+      productInfo: data.product || "",
     });
 
     const savedOrg = await newOrg.save();
@@ -35,6 +35,7 @@ const createOrganization = async (req, res, next) => {
     await User.findByIdAndUpdate(user._id, {
       phoneNumber: data.phoneNumber || user.phoneNumber,
       isOrganization: 1,
+      organization: savedOrg._id
     });
 
     return res.status(201).json({

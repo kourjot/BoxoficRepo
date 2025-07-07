@@ -1,7 +1,7 @@
 import {User} from "../model/user.js";
 import jwt from "jsonwebtoken";
 import * as ERROR from "../common/error_message.js";
-
+import { sendSuccess} from "../utils/responseHandler.js";
 import argon2  from "argon2"
 import "dotenv/config";
 
@@ -106,4 +106,21 @@ const login = async (req, res, next) => {
     next(err); // Let the global error handler catch it
   }
 };
-export { signIn, login };
+
+const getUserById = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate("organization") // <-- This line will only work if User schema has organization ref
+      .select("-password");
+
+    if (!user) {
+      throw new Error(ERROR.USER_NOT_FOUND);
+    }
+
+    return sendSuccess(res, "User fetched successfully", user);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { signIn, login,getUserById };
