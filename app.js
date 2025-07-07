@@ -5,6 +5,7 @@ import { adminRouter } from "./routes/adminRoutes.js"
 import { eventRouter } from "./routes/eventRoutes.js"
 import { errorHandler } from "./middleware/globalErrorHandler.js"
 import {teamLeadRoutes} from "./routes/teamLeadRoutes.js";
+import { stageRouter } from "./routes/stageRoutes.js";
 import "dotenv/config"
 import  cors from "cors"
 
@@ -22,6 +23,7 @@ app.use("/api/event", eventRouter);
 
 app.use("/api/teamLead", teamLeadRoutes);
 
+app.use("/api/stage", stageRouter);
 
 app.use(errorHandler)
 

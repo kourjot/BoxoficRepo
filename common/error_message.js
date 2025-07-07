@@ -24,6 +24,14 @@ export const EMAIL = "200::422:: Email is require.";
 
 // common/error_message.js
 
+export const  STAGE_NOT_FOUND="200::404::Stage not found.";
+
+export const STAGE_ID_REQUIRED= "200::400::Stage ID is required.";
+
+
+
+export const TAGE_ID_REQUIRED= "200::400::Stage ID is required.";
+
 export const NO_MANAGERS_FOUND = "200::404::No managers found.";
 
 export const MANAGER_NOT_FOUND = "200::404::Manager not found.";
@@ -34,7 +42,11 @@ export const EVENT_NOT_FOUND = "200::404::Event not found";
 
 export const NO_TEAMLEADS_FOUND = "200::404::No teamLeads found.";
 
+export const NO_STAGES_FOUND = "200::404::No stages found.";
 
+export const STAGE_NAME_REQUIRED = "200::422::Stage name is required.";
+
+export const STAGE_ORDER_REQUIRED = "200::422::Stage order is required.";
 
 export const ACCESS_DENIED = "200::403::Access denied: insufficient permissions";
 

@@ -1,0 +1,5 @@
+// { "name": "Contacted", "order": 2 },
+  // { "name": "Qualified", "order": 3 },
+  // { "name": "Proposal Sent", "order": 4 },
+  // { "name": "Negotiation", "order": 5 },
+  // { "name": "Closed", "order": 6 }
