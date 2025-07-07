@@ -24,6 +24,11 @@ export const EMAIL = "200::422:: Email is require.";
 
 export const SOCIALID = "200::422:: Social Id is require.";
 
+export const TOKEN_MISSING = "200::401::Unauthorized: Token missing or malformed";
+
+export const TOKEN_INVALID = "200::401::Unauthorized: Token is invalid or expired";
+
+
 export const COUNTRY_CODE = "200::422:: Country code is require.";
 export const COUNTRY_SHORT_CODE = "200::422:: Country Short code is require.";
 

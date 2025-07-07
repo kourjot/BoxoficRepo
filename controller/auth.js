@@ -8,6 +8,7 @@ import "dotenv/config";
 const signIn = async (req, res, next) => {
   const { name, email, password, phoneNumber, role } = req.body;
 
+  // console.log(name, email, password);
   try {
     // 🔍 Basic validation
     if (!name) throw new Error(ERROR.NAME);
@@ -15,11 +16,14 @@ const signIn = async (req, res, next) => {
     if (!password) throw new Error(ERROR.PASSWORD);
     
     // ❗ Check if user already exists
+    // console.log(name)
     const userExists = await User.findOne({ email });
+    // console.log(userExists)
     if (userExists) throw new Error(ERROR.ACCOUNT_ALREADY_EXISTS);
 
     // 🔐 Hash the password
     const hash = await argon2.hash(password);
+    // console.log(hash);
 
     // 👤 Create user
     const newUser = new User({
@@ -29,16 +33,19 @@ const signIn = async (req, res, next) => {
       phoneNumber,
       role: role 
     });
+    // console.log(newUser);
+    // console.log(userExists.name)
     const token = jwt.sign(
       {
-        username: userExists.name,
-        email: userExists.email,
-        userId: userExists._id,
-        role: userExists.role,
+        username: newUser.name,
+        email: newUser.email,
+        userId: newUser._id,
+        role: newUser.role,
       },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "7d" }
     );
+    // console.log(token);
 
     await newUser.save();
 

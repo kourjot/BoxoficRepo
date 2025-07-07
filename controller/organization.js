@@ -2,40 +2,47 @@
 import {Organization} from "../model/organization.js";
 import {User }from "../model/user.js";
 
+import * as ERROR from "../common/error_message.js";
 
-
-const createOrganization = async (req, res) => {
+const createOrganization = async (req, res, next) => {
   const data = req.body;
 
   try {
-    const user = await User.findById(data.owner);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    // ✅ Get owner from JWT
+    const ownerId = req.user?.userId;
+    if (!ownerId) throw new Error(ERROR.USER_NOT_FOUND);
 
+    // ✅ Required field validations
+    if (!data.company_name) throw new Error(ERROR.NAME);
+    if (!data.size) throw new Error("200::422::Organization size is required.");
+    if (!data.sector) throw new Error("200::422::Organization sector is required.");
+
+    const user = await User.findById(ownerId);
+    if (!user) throw new Error(ERROR.USER_NOT_FOUND);
+
+    // ✅ Create Organization
     const newOrg = new Organization({
       company_name: data.company_name,
       size: data.size,
       sector: data.sector,
       owner: user._id,
-      product: data.product
+      product: data.product || "",
     });
 
     const savedOrg = await newOrg.save();
 
-    // ✅ Update phoneNumber & isOrganization flag in User
+    // ✅ Update user org status
     await User.findByIdAndUpdate(user._id, {
-      phoneNumber:data.phoneNumber,
+      phoneNumber: data.phoneNumber || user.phoneNumber,
       isOrganization: 1,
     });
 
-    res.status(201).json({
-      msg: "Organization created successfully",
-      id: savedOrg._id.toString(),
+    return res.status(201).json({
+      status: true,
+      message: "Organization created successfully"
     });
-
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -44,48 +51,45 @@ const createOrganization = async (req, res) => {
 
 
 
-const getOrganizations = async (req, res) => {
+
+const getOrganizations = async (req, res, next) => {
   try {
     const organizations = await Organization.find({ isDeleted: false }).populate("owner", "name email");
     res.status(200).json({ organizations });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch organizations", details: err.message });
+    next(new Error(ERROR.INTERNAL_ERROR));
   }
 };
 
 
-const getOrganizationById = async (req, res) => {
+const getOrganizationById = async (req, res, next) => {
   const { id } = req.params;
 
   try {
     const organization = await Organization.findOne({ _id: id, isDeleted: false }).populate("owner", "name email");
-    if (!organization) {
-      return res.status(404).json({ message: "Organization not found" });
-    }
+    if (!organization) throw new Error(ERROR.DATA_NOT_FOUND);
 
     res.status(200).json({ organization });
   } catch (err) {
-    res.status(500).json({ error: "Error fetching organization", details: err.message });
+    next(err);
   }
 };
 
-const updateOrganization = async (req, res) => {
+const updateOrganization = async (req, res, next) => {
   const { id } = req.params;
   const { company_name, size, sector } = req.body;
-  console.log(req.user.userId)
+
+
   try {
     const organization = await Organization.findById(id);
-
-    if (!organization) {
-      return res.status(404).json({ message: "Organization not found" });
-    }
     console.log(organization)
-    // Optional: Only allow the owner to update
-    if (organization.owner.toString() !== req.user.userId) {
-      return res.status(403).json({ message: "Forbidden: Not the owner" });
-    }
+    if (!organization) throw new Error(ERROR.DATA_NOT_FOUND);
 
-    // Update fields
+    if (organization.owner.toString() !== req.user.userId) {
+      throw new Error("200::403::Forbidden: Not the owner");
+    }
+    console.log(req.user.userId)
+
     if (company_name) organization.company_name = company_name;
     if (size) organization.size = size;
     if (sector) organization.sector = sector;
@@ -97,28 +101,23 @@ const updateOrganization = async (req, res) => {
       organization,
     });
   } catch (err) {
-    res.status(500).json({ error: "Failed to update organization", details: err.message });
+    next(err);
   }
 };
 
-
-const softDeleteOrganization = async (req, res) => {
+const softDeleteOrganization = async (req, res, next) => {
   const { id } = req.params;
 
   try {
     const org = await Organization.findById(id);
+    if (!org) throw new Error(ERROR.DATA_NOT_FOUND);
 
-    if (!org) {
-      return res.status(404).json({ message: "Organization not found" });
-    }
-
-    
     org.isDeleted = true;
     await org.save();
 
     res.status(200).json({ message: "Organization soft-deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Failed to delete organization", details: error.message });
+    next(new Error(ERROR.INTERNAL_ERROR));
   }
 };
 
