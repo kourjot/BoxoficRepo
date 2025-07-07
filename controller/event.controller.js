@@ -1,69 +1,98 @@
 import { Event } from "../model/event.model.js";
+import { sendSuccess } from "../utils/responseHandler.js";
+import * as ERROR from "../common/error_message.js"
+// Create Event
 
-// ✅ Create Event
- const createEvent = async (req, res) => {
+const createEvent = async (req, res, next) => {
   try {
-    const { title, description, date } = req.body;
+
+    const { title, description } = req.body;
+
+    // Validation
+    if (!title) throw new Error(ERROR.EVENT_TITLE_REQUIRED);
+    if (!description) throw new Error(ERROR.EVENT_DESCRIPTION_REQUIRED);
+
 
     const newEvent = new Event({
       title,
       description,
-      date,
-      createdBy: req.user.userId, // comes from token
+      createdBy: req.user.userId, // userId from verified token
     });
 
     await newEvent.save();
 
-    res.status(201).json({ msg: "Event created", event: newEvent });
+    return sendSuccess(res, "Event created successfully", newEvent, 201);
   } catch (err) {
-    res.status(500).json({ msg: "Error creating event", error: err.message });
+    next(err); // Send error to global handler
   }
 };
+// Get All Events
 
-// ✅ Get All Events
- const getAllEvents = async (req, res) => {
+
+const getAllEvents = async (req, res, next) => {
   try {
-    const events = await Event.find({ isDeleted: false }).populate("createdBy", "name email role");
-    res.status(200).json({ events });
+    const events = await Event.find({ isDeleted: false }).populate(
+      "createdBy",
+      "name email role"
+    );
+
+    if (events.length === 0) {
+      throw new Error(ERROR.NO_EVENTS_FOUND); // Optional custom error
+    }
+
+    return sendSuccess(res, "Events fetched successfully", events);
   } catch (err) {
-    res.status(500).json({ msg: "Error fetching events", error: err.message });
+    next(err); // Pass to global error handler
   }
 };
 
-// ✅ Get Event By ID
- const getEventById = async (req, res) => {
+
+//  Get Event By ID
+const getEventById = async (req, res, next) => {
   try {
-    const event = await Event.findOne({ _id: req.params.id, isDeleted: false });
-    if (!event) return res.status(404).json({ msg: "Event not found" });
-    res.status(200).json({ event });
+    const event = await Event.findOne({ _id: req.params.id, isDeleted: false }).populate("createdBy", "name email role");
+
+    if (!event) {
+      throw new Error(ERROR.EVENT_NOT_FOUND);  // Define this in error_message.js
+    }
+
+    return sendSuccess(res, "Event fetched successfully", event);
   } catch (err) {
-    res.status(500).json({ msg: "Error fetching event", error: err.message });
+    next(err); // Send to global error handler
   }
 };
 
-// ✅ Update Event
- const updateEvent = async (req, res) => {
+const updateEvent = async (req, res, next) => {
   try {
     const updated = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.status(200).json({ msg: "Event updated", updated });
+
+    if (!updated) {
+      throw new Error(ERROR.EVENT_NOT_FOUND); // Make sure this is defined
+    }
+
+    return sendSuccess(res, "Event updated successfully", { updated });
   } catch (err) {
-    res.status(500).json({ msg: "Error updating event", error: err.message });
+    next(err); // Pass to global error handler
   }
 };
 
-// ✅ Soft Delete Event
- const deleteEvent = async (req, res) => {
+//  Soft Delete Event
+const deleteEvent = async (req, res, next) => {
   try {
     const deleted = await Event.findByIdAndUpdate(
       req.params.id,
       { isDeleted: true },
       { new: true }
     );
-    res.status(200).json({ msg: "Event soft-deleted", deleted });
+
+    if (!deleted) {
+      throw new Error(ERROR.EVENT_NOT_FOUND); // Ensure this is defined in error_message.js
+    }
+
+    return sendSuccess(res, "Event soft-deleted successfully", deleted);
   } catch (err) {
-    res.status(500).json({ msg: "Error deleting event", error: err.message });
+    next(err); // Pass to global error handler
   }
 };
-
 
 export { createEvent, getAllEvents, getEventById, updateEvent, deleteEvent };

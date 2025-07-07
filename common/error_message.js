@@ -28,6 +28,13 @@ export const NO_MANAGERS_FOUND = "200::404::No managers found.";
 
 export const MANAGER_NOT_FOUND = "200::404::Manager not found.";
 
+export const NO_EVENTS_FOUND = "200::404::No events found.";
+
+export const EVENT_NOT_FOUND = "200::404::Event not found";
+
+export const NO_TEAMLEADS_FOUND = "200::404::No teamLeads found.";
+
+
 
 export const ACCESS_DENIED = "200::403::Access denied: insufficient permissions";
 

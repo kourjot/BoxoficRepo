@@ -4,6 +4,7 @@ import { router } from "./routes/authRoutes.js"
 import { adminRouter } from "./routes/adminRoutes.js"
 import { eventRouter } from "./routes/eventRoutes.js"
 import { errorHandler } from "./middleware/globalErrorHandler.js"
+import {teamLeadRoutes} from "./routes/teamLeadRoutes.js";
 import "dotenv/config"
 import  cors from "cors"
 
@@ -16,6 +17,12 @@ const PORT=process.env.PORT
 app.use(express.json())
 app.use("/api",router)
 app.use("/api/admin", adminRouter);
+
+app.use("/api/event", eventRouter);
+
+app.use("/api/teamLead", teamLeadRoutes);
+
+
 app.use(errorHandler)
 
 app.listen(PORT,()=>{  

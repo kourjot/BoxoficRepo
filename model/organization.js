@@ -17,7 +17,7 @@ const organizationSchema = new Schema({
     ref: "User",  
     required: true,
   },
-   product: {
+  productInfo: {
     type: String,  // <-- Will store extracted text from PDF/Doc
     default: "",   // optional
   },
