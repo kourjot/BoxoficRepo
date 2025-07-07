@@ -1,14 +1,17 @@
+import * as ERROR from "../common/error_message.js";
+
+
 const authorizeRoles = (...allowedRoles) => {
   return (req, res, next) => {
     const userRole = req.user.role;
-    // console.log("User Role:", userRole); 
 
     if (!allowedRoles.includes(userRole)) {
-      return res.status(403).json({ message: "Access denied: insufficient permissions" });
+      //  Not allowed
+      throw new Error(ERROR.ACCESS_DENIED);
     }
 
     next(); // Role is allowed
   };
 };
 
-export default authorizeRoles;
+export { authorizeRoles };

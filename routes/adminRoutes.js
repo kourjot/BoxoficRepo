@@ -2,7 +2,7 @@ import {Router} from "express";
 import { createManager, getAllManagers ,updateManager ,deleteManager} from "../controller/admin.controller.js";
 
 import {tokenVerify} from "../middleware/auth.js";
-import authorizeRoles from "../middleware/authorizeRoles.js";
+import {authorizeRoles} from "../middleware/authorizeRoles.js";
 
 const adminRouter = Router();
 

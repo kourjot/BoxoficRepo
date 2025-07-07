@@ -95,11 +95,11 @@ const login = async (req, res, next) => {
       message:  "Logged in successfully",
       token,
       user: {
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        isOrganization: newUser.isOrganization,
-        _id: newUser._id,
+        name: userExists.name,
+        email:userExists.email,
+        role: userExists.role,
+        isOrganization: userExists.isOrganization,
+        _id: userExists._id,
       },
     });
   } catch (err) {

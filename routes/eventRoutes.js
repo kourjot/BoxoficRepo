@@ -3,7 +3,7 @@ import {Router} from "express";
 import {createEvent, getAllEvents, getEventById, updateEvent, deleteEvent } from "../controller/event.controller.js";
 
 import {tokenVerify} from "../middleware/auth.js";
-import authorizeRoles from "../middleware/authorizeRoles.js";
+import{ authorizeRoles }from "../middleware/authorizeRoles.js";
 
 const eventRouter = Router();
 

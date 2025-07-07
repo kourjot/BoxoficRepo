@@ -22,6 +22,15 @@ export const USER_NOT_FOUND = "200::422:: User not Found.";
 
 export const EMAIL = "200::422:: Email is require.";
 
+// common/error_message.js
+
+export const NO_MANAGERS_FOUND = "200::404::No managers found.";
+
+export const MANAGER_NOT_FOUND = "200::404::Manager not found.";
+
+
+export const ACCESS_DENIED = "200::403::Access denied: insufficient permissions";
+
 export const SOCIALID = "200::422:: Social Id is require.";
 
 export const TOKEN_MISSING = "200::401::Unauthorized: Token missing or malformed";

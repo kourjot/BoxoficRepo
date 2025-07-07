@@ -1,63 +1,104 @@
 import { User } from "../model/user.js";
 import argon2  from "argon2"
+
+import * as ERROR from "../common/error_message.js";
+
+import { sendSuccess} from "../utils/responseHandler.js";
 //  Admin creates Manager
-const createManager = async (req, res) => {
+
+
+const createManager = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
+
+    // Validate required fields
+    if (!name) throw new Error(ERROR.NAME);
+    if (!email) throw new Error(ERROR.EMAIL);
+    if (!password) throw new Error(ERROR.PASSWORD);
+
+    // Check if email already exists
     const existing = await User.findOne({ email });
-    if (existing) return res.status(409).json({ message: "Email already in use" });
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-    
+    if (existing) throw new Error(ERROR.ACCOUNT_ALREADY_EXISTS);
+
+    //  Hash password
     const hashedPassword = await argon2.hash(password);
+
+    //  Create new manager
     const newManager = new User({
       name,
       email,
       password: hashedPassword,
-      role: "manager"
+      role: "manager",
     });
 
     await newManager.save();
-    res.status(201).json({ message: "Manager created", user: newManager });
+
+    return sendSuccess(res, "Manager created successfully", {
+      user: {
+        name: newManager.name,
+        email: newManager.email,
+        role: newManager.role,
+        _id: newManager._id,
+      },
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err); // Send to global error handler
   }
 };
 
-const getAllManagers = async (req, res) => {
+
+
+const getAllManagers = async (req, res, next) => {
   try {
     const managers = await User.find({ role: "manager" });
-    res.status(200).json({ managers });
+
+    // Optional: if no managers found
+    if (managers.length === 0) {
+      throw new Error(ERROR.NO_MANAGERS_FOUND);
+    }
+
+     return sendSuccess(res, "Managers fetched successfully", { managers });
   } catch (err) {
-    res.status(500).json({ msg: "Error fetching managers", error: err.message });
+    next(err); // send to global error handler
   }
 };
-
- const updateManager = async (req, res) => {
+const updateManager = async (req, res, next) => {
   try {
     const updated = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
-    res.status(200).json({ msg: "Manager updated", updated });
+
+    //  Check if manager exists
+    if (!updated) {
+      throw new Error(ERROR.DATA_NOT_FOUND); // Or: ERROR.MANAGER_NOT_FOUND
+    }
+
+    //  Send proper success response
+    return sendSuccess(res, "Manager updated successfully", {
+      updated,
+    });
+
   } catch (err) {
-    res.status(500).json({ msg: "Error updating manager", error: err.message });
+    next(err); //  Forward error to global error handler
   }
 };
-
- const deleteManager = async (req, res) => {
+const deleteManager = async (req, res, next) => {
   try {
     const deleted = await User.findByIdAndUpdate(
       req.params.id,
       { isDeleted: true },
       { new: true }
     );
-    res.status(200).json({ msg: "Manager soft-deleted", deleted });
+
+    if (!deleted) {
+      return sendError(res, "200::404::Manager not found", 404);
+    }
+
+    return sendSuccess(res, "Manager soft-deleted successfully", deleted);
   } catch (err) {
-    res.status(500).json({ msg: "Error deleting manager", error: err.message });
+    next(err); // global error handler will handle it
   }
 };
-
 
 
 export { createManager,getAllManagers ,updateManager ,deleteManager};
