@@ -74,6 +74,7 @@ const login = async (req, res, next) => {
     if (!password) throw new Error(ERROR.PASSWORD);
 
     const userExists = await User.findOne({ email });
+    console.log(userExists)
     if (!userExists) throw new Error(ERROR.USER_NOT_FOUND);
 
     const valid = await argon2.verify(userExists.password, password);
@@ -111,15 +112,24 @@ const login = async (req, res, next) => {
 
 const getUserById = async (req, res, next) => {
   try {
+    // const user = await User.findById(req.params.id)
+    //   .populate("organization") // <-- This line will only work if User schema has organization ref
+    //   .select("-password");
     const user = await User.findById(req.params.id)
-      .populate("organization") // <-- This line will only work if User schema has organization ref
-      .select("-password");
-
+  .populate("organization") // Optional: if needed
+  .select("name email role picture phoneNumber isGoogleUser ");
     if (!user) {
       throw new Error(ERROR.USER_NOT_FOUND);
     }
-
-    return sendSuccess(res, "User fetched successfully", user);
+    const response = {
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      picture: user.picture,
+      phoneNumber: user.phoneNumber,
+      isGoogleUser: user.isGoogleUser,
+    };
+    return sendSuccess(res, "User fetched successfully",response);
   } catch (err) {
     next(err);
   }

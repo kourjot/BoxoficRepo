@@ -24,6 +24,7 @@ const googleLogin = async (req, res, next) => {
         picture,
         socialId,
         isGoogleUser: true,
+
       });
 
       await user.save();
@@ -48,9 +49,10 @@ const googleLogin = async (req, res, next) => {
         name: user.name,
         email: user.email,
         picture: user.picture,
-        organization: user.isOrganization,
+        organizationId: user.organization,
         role: user.role,
         _id: user._id,
+        organization: user.isOrganization
      },
     });
   } catch (error) {

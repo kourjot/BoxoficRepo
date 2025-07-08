@@ -35,6 +35,11 @@ export const STAGE_NOT_IN_PIPELINE = "Stage not found in pipeline";
 
 export const STAGE_UPDATE_FAILED = "Unable to update stage in pipeline";
 
+export const DEAL_TITLE_REQUIRED = "Deal title is required";
+export const DEAL_VALUE_REQUIRED = "Deal value is required";
+
+export const USER_ID_REQUIRED = "User ID is missing";
+
 
 export const  STAGE_NOT_FOUND="200::404::Stage not found.";
 
