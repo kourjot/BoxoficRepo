@@ -22,7 +22,19 @@ export const USER_NOT_FOUND = "200::422:: User not Found.";
 
 export const EMAIL = "200::422:: Email is require.";
 
+
+
 // common/error_message.js
+export const PIPELINE_ID_REQUIRED = "Pipeline ID is required";
+
+export const PIPELINE_NOT_FOUND = "Pipeline not found";
+
+export const STAGE_ALREADY_EXISTS = "Stage already exists in this pipeline";
+
+export const STAGE_NOT_IN_PIPELINE = "Stage not found in pipeline";
+
+export const STAGE_UPDATE_FAILED = "Unable to update stage in pipeline";
+
 
 export const  STAGE_NOT_FOUND="200::404::Stage not found.";
 

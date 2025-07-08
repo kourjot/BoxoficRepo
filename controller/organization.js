@@ -36,6 +36,7 @@ const createOrganization = async (req, res, next) => {
       phoneNumber: data.phoneNumber || user.phoneNumber,
       isOrganization: 1,
       organization: savedOrg._id
+      
     });
 
     return res.status(201).json({
