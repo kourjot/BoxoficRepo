@@ -106,6 +106,10 @@ const login = async (req, res, next) => {
     next(err); // Let the global error handler catch it
   }
 };
+const healthCheck = (req, res) => {
+  return res.status(200).json({ message: "Server is running" });
+};
+
 
 const getUserById = async (req, res, next) => {
   try {
@@ -123,4 +127,4 @@ const getUserById = async (req, res, next) => {
   }
 };
 
-export { signIn, login,getUserById };
+export { signIn, login,getUserById ,healthCheck };
