@@ -10,7 +10,7 @@ import { tokenVerify} from "../middleware/auth.js";
 
 pipelineRouter.post("/create-pipeline",tokenVerify, createPipeline)
 
-pipelineRouter.get("/get-all-pipelines", tokenVerify, getAllPipelines)
+pipelineRouter.get("/get-pipeline", tokenVerify, getAllPipelines)
 
 pipelineRouter.patch("/update-stage/:id", tokenVerify, upsertStageToPipeline)
 

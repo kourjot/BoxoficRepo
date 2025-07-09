@@ -2,9 +2,7 @@ import {Pipeline } from "../model/pipeline.model.js";
 import {Stage} from "../model/stage.model.js";
 import * as ERROR from "../common/error_message.js";
 import { sendSuccess } from "../utils/responseHandler.js";
-
-
-
+   
 const createPipeline = async (req, res, next) => {
   try {
     const { name, stages } = req.body;
@@ -16,7 +14,7 @@ const createPipeline = async (req, res, next) => {
     const pipeline = new Pipeline({
       name,
       stages,
-      createdBy: req.user.userId, // coming from auth middleware
+      createdBy: req.user.userId, 
     });
 
     const savedPipeline = await pipeline.save();
@@ -31,7 +29,8 @@ const createPipeline = async (req, res, next) => {
 const getAllPipelines = async (req, res, next) => {
   try {
     const userId = req.user.userId;
-
+    
+    
     const pipelines = await Pipeline.find({ createdBy: userId })
       .populate("stages") // optional: if you want to return full stage info
       .sort({ createdAt: -1 });
