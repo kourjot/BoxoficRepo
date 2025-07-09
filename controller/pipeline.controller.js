@@ -25,25 +25,25 @@ const createPipeline = async (req, res, next) => {
   }
 };
 
-
 const getAllPipelines = async (req, res, next) => {
   try {
     const userId = req.user.userId;
-    
-    
+
     const pipelines = await Pipeline.find({ createdBy: userId })
-      .populate("stages") // optional: if you want to return full stage info
+      .populate("stages") // optional: returns full stage info
       .sort({ createdAt: -1 });
 
-    if (!pipelines || pipelines.length === 0) {
-      throw new Error("No pipelines found");
-    }
+    const message =
+      pipelines.length === 0
+        ? "No pipelines found for this user"
+        : "Pipelines fetched successfully";
 
-    return sendSuccess(res, "Pipelines fetched successfully", { pipelines });
+    return sendSuccess(res, message, { pipelines });
   } catch (err) {
     next(err);
   }
 };
+
 
 const upsertStageToPipeline = async (req, res, next) => {
   try {
