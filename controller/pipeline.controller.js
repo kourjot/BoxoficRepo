@@ -25,66 +25,58 @@ const createPipeline = async (req, res, next) => {
   }
 };
 
-// const getAllPipelines = async (req, res, next) => {
-//   try {
 
-//     const userId = req.user.userId;
-
-
-//     const pipelines = await Pipeline.find({ createdBy: userId })
-//       .populate("stages") // optional: returns full stage info
-//       .sort({ createdAt: -1 });
-
-//     const message =
-//       pipelines.length === 0
-//         ? "No pipelines found for this user"
-//         : "Pipelines fetched successfully";
-
-//     return sendSuccess(res, message, { pipelines });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
-const getAllPipelines = async (req, res, next) => {
+const getAllPipelines= async (req, res, next) => {
   try {
     const userId = req.user.userId;
-
-    // ✅ Get pipelines created by the user
-    let pipelines = await Pipeline.find({ createdBy: userId })
+   console.log("User ID ", req.user.userId);
+    // Get the pipeline created by this user
+    let pipeline = await Pipeline.findOne({ createdBy: userId })
       .populate({
         path: "stages",
         populate: {
           path: "deals",
+          match: { createdBy: userId }, // filter only user-created deals
         },
-      })
-      .sort({ createdAt: -1 });
-
-    // ✅ If user has no pipelines, fallback to default one
-    if (!pipelines || pipelines.length === 0) {
-      // You must tag your default pipeline in DB (e.g. with isDefault: true)
-      const defaultPipeline = await Pipeline.findOne()
+        options: { sort: { order: 1 } } // sort stages by order
+      });
+    console.log("Pipeline found: ", pipeline);
+    // If no pipeline found, fallback to default
+    if (!pipeline) {
+      pipeline = await Pipeline.findOne({ isDefault: true })
         .populate({
           path: "stages",
           populate: {
             path: "deals",
+            match: { createdBy: userId },
           },
+          options: { sort: { order: 1 } }
         });
 
-      if (defaultPipeline) {
-        pipelines = [defaultPipeline];
-      } else {
-        return res
-          .status(404)
-          .json({ success: false, message: "Default pipeline not found." });
+      if (!pipeline) {
+        return res.status(404).json({
+          status: false,
+          message: "Default pipeline not found",
+        });
       }
     }
 
-    return sendSuccess(res, "Pipelines fetched successfully", { pipelines });
+    return res.status(200).json({
+      status: true,
+      status_code: 200,
+      message: "Deals fetched successfully",
+      data: {
+        pipelineId: pipeline._id,
+        stages: pipeline.stages,
+      },
+    });
   } catch (err) {
     next(err);
   }
 };
+
+
+
 
 
 
