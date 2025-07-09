@@ -25,17 +25,56 @@ const createPipeline = async (req, res, next) => {
   }
 };
 
+// const getAllPipelines = async (req, res, next) => {
+//   try {
+
+//     const userId = req.user.userId;
+
+
+//     const pipelines = await Pipeline.find({ createdBy: userId })
+//       .populate("stages") // optional: returns full stage info
+//       .sort({ createdAt: -1 });
+
+//     const message =
+//       pipelines.length === 0
+//         ? "No pipelines found for this user"
+//         : "Pipelines fetched successfully";
+
+//     return sendSuccess(res, message, { pipelines });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 const getAllPipelines = async (req, res, next) => {
   try {
     const userId = req.user.userId;
 
-    const pipelines = await Pipeline.find({ createdBy: userId })
-      .populate("stages") // optional: returns full stage info
+    // Step 1: Fetch user-created pipelines
+    let pipelines = await Pipeline.find({ createdBy: userId })
+      .populate({
+        path: "stages",
+        populate: {
+          path: "deals", // make sure deals are linked correctly in your Stage schema
+        },
+      })
       .sort({ createdAt: -1 });
+
+    // Step 2: If user has no pipelines, fetch default pipeline (createdBy: null)
+    if (!pipelines || pipelines.length === 0) {
+      pipelines = await Pipeline.find({ createdBy: null })
+        .populate({
+          path: "stages",
+          populate: {
+            path: "deals",
+          },
+        })
+        .sort({ createdAt: -1 });
+    }
 
     const message =
       pipelines.length === 0
-        ? "No pipelines found for this user"
+        ? "No pipelines found"
         : "Pipelines fetched successfully";
 
     return sendSuccess(res, message, { pipelines });
@@ -43,6 +82,7 @@ const getAllPipelines = async (req, res, next) => {
     next(err);
   }
 };
+
 
 
 const upsertStageToPipeline = async (req, res, next) => {

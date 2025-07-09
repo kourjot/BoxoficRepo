@@ -91,29 +91,89 @@ const getDealsByPipeline = async (req, res, next) => {
 const updateDeal = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const { stageId } = req.body;
 
-    //  Check required fields
     if (!id) throw new Error(ERROR.DEAL_ID_REQUIRED);
+    if (!stageId) throw new Error(ERROR.STAGE_ID_REQUIRED);
 
-    //  Optional: Validate stageId and get pipeline again if stage changed
-    if (updates.stageId) {
-      const pipeline = await Pipeline.findOne({ stages: updates.stageId });
-      if (!pipeline) throw new Error(ERROR.PIPELINE_NOT_FOUND);
-      updates.pipeline = pipeline._id; // auto-update pipeline
-    }
+    const deal = await Deal.findById(id);
+    if (!deal) throw new Error(ERROR.DEAL_NOT_FOUND);
 
-    const updatedDeal = await Deal.findByIdAndUpdate(id, updates, {
-      new: true,
+    // Step 1: Find the original pipeline using old stage
+    const oldPipeline = await Pipeline.findOne({ stages: deal.stageId }).lean();
+    if (!oldPipeline) throw new Error(ERROR.PIPELINE_NOT_FOUND);
+
+    // Step 2: Clone stages
+    const clonedStages = await Promise.all(
+      oldPipeline.stages.map(async (stageId) => {
+        const stage = await Stage.findById(stageId).lean();
+        const newStage = new Stage({
+          ...stage,
+          _id: undefined,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+        return await newStage.save();
+      })
+    );
+
+    // Step 3: Create new pipeline
+    const newPipeline = new Pipeline({
+      name: oldPipeline.name,
+      createdBy: oldPipeline.createdBy,
+      stages: clonedStages.map((s) => s._id),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    const savedPipeline = await newPipeline.save();
+
+    // Step 4: Update deal with new stage and pipeline
+    const updatedDeal = await Deal.findByIdAndUpdate(
+      id,
+      {
+        stageId,
+        pipeline: savedPipeline._id,
+      },
+      { new: true }
+    );
+
+    return sendSuccess(res, "Deal moved & new pipeline created", {
+      updatedDeal,
+      newPipelineId: savedPipeline._id,
     });
 
-    if (!updatedDeal) throw new Error(ERROR.DEAL_NOT_FOUND);
-
-    return sendSuccess(res, "Deal updated successfully", updatedDeal);
   } catch (err) {
     next(err);
   }
 };
+
+
+// const updateDeal = async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+//     const updates = req.body;
+
+//     //  Check required fields
+//     if (!id) throw new Error(ERROR.DEAL_ID_REQUIRED);
+
+//     //  Optional: Validate stageId and get pipeline again if stage changed
+//     if (updates.stageId) {
+//       const pipeline = await Pipeline.findOne({ stages: updates.stageId });
+//       if (!pipeline) throw new Error(ERROR.PIPELINE_NOT_FOUND);
+//       updates.pipeline = pipeline._id; // auto-update pipeline
+//     }
+
+//     const updatedDeal = await Deal.findByIdAndUpdate(id, updates, {
+//       new: true,
+//     });
+
+//     if (!updatedDeal) throw new Error(ERROR.DEAL_NOT_FOUND);
+
+//     return sendSuccess(res, "Deal updated successfully", updatedDeal);
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 const deleteDeal = async (req, res, next) => {
   try {

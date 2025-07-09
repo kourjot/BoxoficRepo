@@ -20,6 +20,10 @@ const stageSchema = new Schema(
       type: Boolean,
       default: false, // Soft delete flag
     },
+    deals: [{
+    type: Schema.Types.ObjectId,
+    ref: "Deal", 
+  }]
   },
   { timestamps: true }
 );

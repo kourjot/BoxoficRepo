@@ -18,6 +18,7 @@ const pipelineSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User", // Who created the pipeline
       required: true,
+      default: null, 
     },
   },
   { timestamps: true }
