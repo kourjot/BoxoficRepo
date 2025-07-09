@@ -50,34 +50,37 @@ const getAllPipelines = async (req, res, next) => {
   try {
     const userId = req.user.userId;
 
-    // Step 1: Fetch user-created pipelines
+    // ✅ Get pipelines created by the user
     let pipelines = await Pipeline.find({ createdBy: userId })
       .populate({
         path: "stages",
         populate: {
-          path: "deals", // make sure deals are linked correctly in your Stage schema
+          path: "deals",
         },
       })
       .sort({ createdAt: -1 });
 
-    // Step 2: If user has no pipelines, fetch default pipeline (createdBy: null)
+    // ✅ If user has no pipelines, fallback to default one
     if (!pipelines || pipelines.length === 0) {
-      pipelines = await Pipeline.find({ createdBy: null })
+      // You must tag your default pipeline in DB (e.g. with isDefault: true)
+      const defaultPipeline = await Pipeline.findOne()
         .populate({
           path: "stages",
           populate: {
             path: "deals",
           },
-        })
-        .sort({ createdAt: -1 });
+        });
+
+      if (defaultPipeline) {
+        pipelines = [defaultPipeline];
+      } else {
+        return res
+          .status(404)
+          .json({ success: false, message: "Default pipeline not found." });
+      }
     }
 
-    const message =
-      pipelines.length === 0
-        ? "No pipelines found"
-        : "Pipelines fetched successfully";
-
-    return sendSuccess(res, message, { pipelines });
+    return sendSuccess(res, "Pipelines fetched successfully", { pipelines });
   } catch (err) {
     next(err);
   }
