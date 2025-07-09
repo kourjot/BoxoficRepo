@@ -10,7 +10,7 @@ import {teamLeadRoutes} from "./routes/teamLeadRoutes.js";
 import { stageRouter } from "./routes/stageRoutes.js";
 import { pipelineRouter } from "./routes/pipelineRoutes.js";
 
-// import { dealRouter } from "./routes/dealRoutes.js";
+import { dealRouter } from "./routes/dealRoutes.js";
 
 const app=express()
 app.use(cors())
@@ -30,7 +30,7 @@ app.use("/api/stage", stageRouter);
 
 app.use("/api/pipeline", pipelineRouter);
 
-// app.use("/api/deal", dealRouter);
+app.use("/api/deal", dealRouter);
 app.get("/",async(req,res)=>{
     res.status(200).json({
         message:"Welcome to BoxOfic Backend"
