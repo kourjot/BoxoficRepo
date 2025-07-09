@@ -15,10 +15,6 @@ const dealSchema = new Schema(
       type: Number,
       required: true,
     },
-    stageName: {
-      type: String,
-      required: true, 
-    },
     pipeline: {
       type: Schema.Types.ObjectId,
       ref: "Pipeline", //Reference to which pipeline this deal belongs

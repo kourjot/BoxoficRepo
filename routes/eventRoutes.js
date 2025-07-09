@@ -16,3 +16,6 @@ eventRouter .patch("/update-event/:id", tokenVerify, authorizeRoles("admin", "ma
 eventRouter .delete("/delete-event/:id", tokenVerify, authorizeRoles("admin", "manager"), deleteEvent);
 
 export { eventRouter };
+
+
+ 

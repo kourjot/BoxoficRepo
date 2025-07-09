@@ -12,3 +12,10 @@ dealRouter.patch("/update-deal/:id", tokenVerify, updateDeal);
 
 dealRouter.delete("/delete-deal/:id", tokenVerify, deleteDeal);
 export  {dealRouter}
+
+
+
+
+ 
+
+

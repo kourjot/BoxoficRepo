@@ -11,7 +11,6 @@ const createDeal = async (req, res, next) => {
       description,
       value,
       stageId,
-      stageName,
       code_currency,
       endDate,
     } = req.body;
@@ -22,7 +21,7 @@ const createDeal = async (req, res, next) => {
     if (!title) throw new Error(ERROR.DEAL_TITLE_REQUIRED);
     if (!value) throw new Error(ERROR.DEAL_VALUE_REQUIRED);
     if (!stageId) throw new Error(ERROR.STAGE_ID_REQUIRED);
-    if (!stageName) throw new Error(ERROR.STAGE_NAME_REQUIRED);
+
     if (!createdBy) throw new Error(ERROR.USER_ID_REQUIRED);
 
     //  Get pipeline using stageId
@@ -35,7 +34,6 @@ const createDeal = async (req, res, next) => {
       description,
       value,
       stageId,
-      stageName,
       pipeline: pipeline._id,         // Automatically added
       createdBy,
       code_currency: code_currency || "INR",
